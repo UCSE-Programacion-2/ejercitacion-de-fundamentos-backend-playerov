@@ -33,6 +33,8 @@ const dataFilePath = path.join(__dirname, 'data', 'frutas.json');
  */
 app.get('/frutas', (req, res) => {
   // Tu código aquí
+  const frutas = JSON.parse(fs.readFileSync(dataFilePath,'utf-8'));
+  res.status(200).json(frutas)
 });
 
 /**
@@ -45,6 +47,12 @@ app.get('/frutas', (req, res) => {
  */
 app.get('/frutas/buscar', (req, res) => {
   // Tu código aquí
+  const {nombre}=req.query;
+  const frutas = JSON.parse(fs.readFileSync(dataFilePath, 'utf-8'));
+  const resultado= frutas.filter((f)=>
+    f.nombre.toLowerCase().includes(nombre.toLowerCase())
+  );
+  res.status(200).json(resultado);
 });
 
 /**
@@ -58,6 +66,13 @@ app.get('/frutas/buscar', (req, res) => {
  */
 app.get('/frutas/:id', (req, res) => {
   // Tu código aquí
+  const id = parseInt(req.params.id, 10);
+  const frutas = JSON.parse(fs.readFileSync(dataFilePath, 'utf-8'));
+  const fruta = frutas.find((f) => f.id === id);
+  if (!fruta) {
+    return res.status(404).json({ error: 'Fruta no encontrada' });
+  }
+  res.status(200).json(fruta);
 });
 
 /**
@@ -71,6 +86,12 @@ app.get('/frutas/:id', (req, res) => {
  */
 app.post('/frutas', (req, res) => {
   // Tu código aquí
+   const frutas = JSON.parse(fs.readFileSync(dataFilePath, 'utf-8'));
+  const nuevoId = Math.max(...frutas.map((f) => f.id)) + 1;
+  const nuevaFruta = { id: nuevoId, ...req.body };
+  frutas.push(nuevaFruta);
+  fs.writeFileSync(dataFilePath, JSON.stringify(frutas, null, 2));
+  res.status(201).json(nuevaFruta);
 });
 
 // Iniciar el servidor
